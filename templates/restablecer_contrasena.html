@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema Ganadero - Restablecer Contraseña</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url("{{ url_for('static', filename='images/GANADO-LOGIN-2.jpg') }}");
+            background-size: cover;
+            background-position: center;
+            color: white;
+            text-align: center;
+            background-attachment: fixed;
+        }
+
+        .btn-sidebar {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-sidebar:hover {
+            background-color: #3e8e41;
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .toggle-password {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-form">
+            <div class="form-content">
+                <h2>Restablecer Contraseña</h2>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                <form action="{{ url_for('restablecer_contrasena', token=token) }}" method="POST">
+                    <div class="input-group password-container">
+                        <input type="password" name="password" id="password" required>
+                        <label>Nueva Contraseña</label>
+                        <span class="toggle-password" onclick="togglePassword('password')">👁️</span>
+                    </div>
+                    <div class="input-group password-container">
+                        <input type="password" name="confirm_password" id="confirm_password" required>
+                        <label>Confirmar Contraseña</label>
+                        <span class="toggle-password" onclick="togglePassword('confirm_password')">👁️</span>
+                    </div>
+                    <button type="submit" class="btn-login">Restablecer Contraseña</button>
+                </form>
+            </div>
+        </div>
+        <div class="login-sidebar">
+            <h3>Restablecer Contraseña</h3>
+            <p>Ingresa tu nueva contraseña para acceder al sistema</p>
+            <div class="sidebar-links">
+                <a href="{{ url_for('login') }}" class="btn-sidebar">Iniciar Sesión</a>
+                <a href="{{ url_for('inicio') }}" class="btn-sidebar">Volver al Inicio</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function togglePassword(id) {
+            const passwordInput = document.getElementById(id);
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+            } else {
+                passwordInput.type = "password";
+            }
+        }
+    </script>
+</body>
+</html>

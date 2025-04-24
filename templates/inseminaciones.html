@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+
+{% block title %}Inseminaciones{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Registro de Inseminación</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('registrar_inseminacion') }}" method="POST">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="animal_id" class="form-label">Animal</label>
+                                    <select class="form-select" id="animal_id" name="animal_id" required>
+                                        <option value="">Seleccione un animal</option>
+                                        {% for animal in animales %}
+                                        <option value="{{ animal.id }}">{{ animal.numero_arete }} - {{ animal.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="fecha_inseminacion" class="form-label">Fecha de Inseminación</label>
+                                    <input type="date" class="form-control" id="fecha_inseminacion" name="fecha_inseminacion" required>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="tipo_inseminacion" class="form-label">Tipo</label>
+                                    <select class="form-select" id="tipo_inseminacion" name="tipo_inseminacion" required>
+                                        <option value="">Seleccione tipo</option>
+                                        <option value="Artificial">Artificial</option>
+                                        <option value="Natural">Natural</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="semental" class="form-label">Semental/Pajuela</label>
+                                    <input type="text" class="form-control" id="semental" name="semental" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="raza_semental" class="form-label">Raza del Semental</label>
+                                    <input type="text" class="form-control" id="raza_semental" name="raza_semental">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="codigo_pajuela" class="form-label">Código de Pajuela</label>
+                                    <input type="text" class="form-control" id="codigo_pajuela" name="codigo_pajuela">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label for="inseminador" class="form-label">Inseminador</label>
+                                    <input type="text" class="form-control" id="inseminador" name="inseminador">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    <label for="observaciones" class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="observaciones" name="observaciones" rows="2"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Registrar Inseminación</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla de inseminaciones -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Inseminaciones Registradas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Animal</th>
+                                    <th>Fecha</th>
+                                    <th>Tipo</th>
+                                    <th>Semental/Pajuela</th>
+                                    <th>Raza</th>
+                                    <th>Código</th>
+                                    <th>Inseminador</th>
+                                    <th>Estado</th>
+                                    <th>Observaciones</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in inseminaciones %}
+                                <tr>
+                                    <td>{{ i.numero_arete }} - {{ i.nombre_animal }}</td>
+                                    <td>{{ i.fecha_inseminacion }}</td>
+                                    <td>{{ i.tipo_inseminacion }}</td>
+                                    <td>{{ i.semental }}</td>
+                                    <td>{{ i.raza_semental }}</td>
+                                    <td>{{ i.codigo_pajuela }}</td>
+                                    <td>{{ i.inseminador }}</td>
+                                    <td>
+                                        <span class="badge {% if i.exitosa == None %}bg-warning{% elif i.exitosa %}bg-success{% else %}bg-danger{% endif %}">
+                                            {% if i.exitosa == None %}Pendiente{% elif i.exitosa %}Exitosa{% else %}Fallida{% endif %}
+                                        </span>
+                                    </td>
+                                    <td>{{ i.observaciones }}</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            {% if i.exitosa == None %}
+                                            <button type="button" class="btn btn-sm btn-success" onclick="actualizarEstadoInseminacion('{{ i.id }}', true)" title="Marcar como exitosa">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="actualizarEstadoInseminacion('{{ i.id }}', false)" title="Marcar como fallida">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            {% endif %}
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="abrirModalEditar('{{ i.id }}')" title="Editar inseminación">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmarEliminarInseminacion('{{ i.id }}')" title="Eliminar inseminación">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar inseminación -->
+<div class="modal fade" id="editarInseminacionModal" tabindex="-1" aria-labelledby="editarInseminacionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editarInseminacionModalLabel"><i class="fas fa-edit me-2"></i>Editar Inseminación</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editInseminacionForm" method="POST">
+                    <input type="hidden" id="editInseminacionId" name="inseminacion_id">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editAnimalId" class="form-label">Animal</label>
+                                <select class="form-select" id="editAnimalId" name="animal_id" required>
+                                    <option value="">Seleccione un animal</option>
+                                    {% for animal in animales %}
+                                    <option value="{{ animal.id }}">{{ animal.numero_arete }} - {{ animal.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editFechaInseminacion" class="form-label">Fecha de Inseminación</label>
+                                <input type="date" class="form-control" id="editFechaInseminacion" name="fecha_inseminacion" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editTipoInseminacion" class="form-label">Tipo</label>
+                                <select class="form-select" id="editTipoInseminacion" name="tipo" required>
+                                    <option value="">Seleccione tipo</option>
+                                    <option value="Artificial">Artificial</option>
+                                    <option value="Natural">Natural</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="editSemental" class="form-label">Semental/Pajuela</label>
+                                <input type="text" class="form-control" id="editSemental" name="semental" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="editRazaSemental" class="form-label">Raza del Semental</label>
+                                <input type="text" class="form-control" id="editRazaSemental" name="raza_semental">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="editCodigoPajuela" class="form-label">Código de Pajuela</label>
+                                <input type="text" class="form-control" id="editCodigoPajuela" name="codigo_pajuela">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="editInseminador" class="form-label">Inseminador</label>
+                                <input type="text" class="form-control" id="editInseminador" name="inseminador">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="editObservaciones" class="form-label">Observaciones</label>
+                                <textarea class="form-control" id="editObservaciones" name="observaciones" rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label for="editExitosa" class="form-label">Estado</label>
+                                <select class="form-select" id="editExitosa" name="exitosa">
+                                    <option value="">Pendiente</option>
+                                    <option value="1">Exitosa</option>
+                                    <option value="0">Fallida</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="guardarEdicionInseminacion()">Guardar cambios</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript para actualizar estado de inseminación y editar inseminación -->
+<script>
+// Función para confirmar y eliminar inseminación
+function confirmarEliminarInseminacion(id) {
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "Esta acción no se puede revertir",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            eliminarInseminacion(id);
+        }
+    });
+}
+
+// Función para eliminar inseminación
+function eliminarInseminacion(id) {
+    fetch(`/eliminar_inseminacion/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Eliminado',
+                text: 'La inseminación ha sido eliminada correctamente',
+                icon: 'success'
+            }).then(() => {
+                window.location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: data.message || 'Ocurrió un error al eliminar la inseminación',
+                icon: 'error'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Ocurrió un error al eliminar la inseminación',
+            icon: 'error'
+        });
+    });
+}
+
+function actualizarEstadoInseminacion(inseminacionId, exitosa) {
+    fetch('/actualizar_estado_inseminacion', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            inseminacion_id: inseminacionId,
+            exitosa: exitosa
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Estado actualizado',
+                text: data.message,
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+        } else {
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Error al actualizar el estado',
+            icon: 'error'
+        });
+    });
+}
+
+// Función para abrir el modal de edición de inseminación
+function abrirModalEditar(inseminacionId) {
+    // Obtener los datos de la inseminación
+    fetch(`/obtener_inseminacion/${inseminacionId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Llenar el formulario del modal con los datos
+            document.getElementById('editInseminacionId').value = data.id;
+            document.getElementById('editAnimalId').value = data.animal_id;
+            document.getElementById('editFechaInseminacion').value = data.fecha_inseminacion.split(' ')[0]; // Solo la fecha, sin hora
+            document.getElementById('editTipoInseminacion').value = data.tipo_inseminacion || data.tipo;
+            document.getElementById('editSemental').value = data.semental;
+            document.getElementById('editRazaSemental').value = data.raza_semental;
+            document.getElementById('editCodigoPajuela').value = data.codigo_pajuela;
+            document.getElementById('editInseminador').value = data.inseminador;
+            document.getElementById('editObservaciones').value = data.observaciones;
+            
+            // Establecer el estado
+            if (data.exitosa === null) {
+                document.getElementById('editExitosa').value = '';
+            } else if (data.exitosa === 1 || data.exitosa === true) {
+                document.getElementById('editExitosa').value = '1';
+            } else {
+                document.getElementById('editExitosa').value = '0';
+            }
+            
+            // Abrir el modal
+            const editModal = new bootstrap.Modal(document.getElementById('editarInseminacionModal'));
+            editModal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'Error al obtener los datos de la inseminación',
+                icon: 'error'
+            });
+        });
+}
+
+// Función para guardar la edición de inseminación
+function guardarEdicionInseminacion() {
+    const inseminacionId = document.getElementById('editInseminacionId').value;
+    const form = document.getElementById('editInseminacionForm');
+    
+    // Crear un FormData con los datos del formulario
+    const formData = new FormData(form);
+    
+    // Enviar los datos al servidor
+    fetch(`/editar_inseminacion/${inseminacionId}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.redirected) {
+            window.location.href = response.url;
+        } else {
+            return response.json();
+        }
+    })
+    .then(data => {
+        if (data && !data.success) {
+            Swal.fire({
+                title: 'Error',
+                text: data.message,
+                icon: 'error'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: 'Error',
+            text: 'Error al guardar los cambios',
+            icon: 'error'
+        });
+    });
+}
+</script>
+{% endblock %}

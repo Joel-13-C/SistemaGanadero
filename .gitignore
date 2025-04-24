@@ -1,0 +1,22 @@
+# Entorno virtual
+venv/
+env/
+__pycache__/
+
+# Archivos de configuración local
+.env
+*.pyc
+
+# Archivos de respaldo
+*.bak
+*.backup
+respaldos/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de desarrollo
+*.log
+.vscode/
+.idea/
