@@ -5,3 +5,4 @@ werkzeug==2.1.1
 apscheduler==3.9.1
 reportlab==4.2.5
 gunicorn==20.1.0
+mysql-connector-python
